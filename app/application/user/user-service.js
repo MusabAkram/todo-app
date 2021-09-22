@@ -1,39 +1,79 @@
-const User = require("../../domain/models/user");
+const User = require("../../domain/models/mongoose/user");
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
+const { v1: uuidv1 } = require('uuid');
 
 class UserService {
-    createUser({ firstName, lastName, email, password }) {
+    async createUser({ firstName, lastName, email, password }) {
         if (!(email && password && firstName && lastName)) {
-            res.status(400).send("All input is required");
+            throw new Error('All inputs are required');
         }
 
         const oldUser = await User.findOne({ email });
 
         if (oldUser) {
-            return res.status(409).send("User Already Exist. Please Login");
+            throw new Error('User Already Exist. Please Login');
         }
 
         const encryptedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({
-            firstName,
-            lastName,
-            email: email.toLowerCase(),
-            password: encryptedPassword,
-        });
-
+        const userId = uuidv1()
         const token = jwt.sign(
-            { user_id: user._id, email },
-            process.env.TOKEN_KEY,
+            { userId },
+            process.env.TOKEN_SECRET,
             {
                 expiresIn: "2h",
             }
         );
 
-        user.token = token;
+        const user = await User.create({
+            userId,
+            firstName,
+            lastName,
+            email: email.toLowerCase(),
+            password: encryptedPassword,
+            accessToken: token
+        });
 
         return user
+    }
+
+    async getUser(userId) {
+        const user = User.findOne({ userId })
+        return user
+    }
+
+    async loginUser({ email, password }) {
+        const user = User.findOne({ email })
+
+        const isValidPassword = bcrypt.compare(password)
+
+        if (!isValidPassword) {
+            throw new Error('Invalid credentials');
+        }
+        const token = jwt.sign(
+            { userId: user.userId },
+            process.env.TOKEN_SECRET,
+            {
+                expiresIn: "2h",
+            }
+        );
+
+        user.update({ accessToken: token })
+
+        return user
+    }
+
+    async updateUser({ userId, payload }) {
+        const user = User.updateOne({ userId }, { ...payload })
+
+        return user
+    }
+
+    async deleteUser({ userId }) {
+        const res = User.deleteOne({ userId });
+
+        return res;
     }
 }
 
