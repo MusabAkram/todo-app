@@ -5,22 +5,42 @@ class TodoController {
     async createTodo(req, res) {
         try {
             const { title, description } = req.body;
+            const userId = req.params
 
-            const todo = await TodoService.createTodo({ title, description })
+            const todo = await TodoService.createTodo({ title, description, userId })
 
             res.status(201).json(todo);
         } catch (err) {
-            return res.status(400).json(err.message)
+            return res.status(err.status).json(err.message)
         }
     }
 
     async getTodoList(req, res) {
         try {
-            const todo = await TodoService.getTodoList(req.params.todoId)
+            const { userId } = req.params
+            const todo = await TodoService.getTodoList(userId)
 
             res.status(201).json(todo);
         } catch (err) {
-            return res.status(400).json(err.message)
+            return res.status(err.status).json(err.message)
+        }
+    }
+    async updateTodo(req, res) {
+        try {
+            const todo = await TodoService.updateTodo({})
+
+            res.status(201).json(todo);
+        } catch (err) {
+            return res.status(err.status).json(err.message)
+        }
+    }
+    async deleteTodo(req, res) {
+        try {
+            const todo = await TodoService.deleteTodo(req.params.todoId)
+
+            res.status(201).json(todo);
+        } catch (err) {
+            return res.status(err.status).json(err.message)
         }
     }
 }

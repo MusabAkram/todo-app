@@ -9,9 +9,10 @@ class UserController {
             const uuid = uuidv1()
             const user = await UserService.createUser({ firstName, lastName, email, password, uuid })
 
-            res.status(201).json(user);
+            return res.status(201).json(user);
+
         } catch (err) {
-            return res.status(400).json(err.message)
+            return res.status(err.status).json(err.message)
         }
     }
 
@@ -28,7 +29,7 @@ class UserController {
             return res.status(200).json(user)
 
         } catch (error) {
-            return res.status(400).json(err.message)
+            return res.status(err.status).json(err.message)
         }
     }
 
@@ -40,8 +41,9 @@ class UserController {
             const user = await UserService.updateUser({ userId, payload })
 
             return res.status(204).json(user)
-        } catch (error) {
 
+        } catch (error) {
+            return res.status(err.status).json(err.message)
         }
     }
 
@@ -54,8 +56,9 @@ class UserController {
             return res.status(204).json({
                 message: "Record deleted successfully!"
             })
-        } catch (error) {
 
+        } catch (error) {
+            return res.status(err.status).json(err.message)
         }
     }
 
