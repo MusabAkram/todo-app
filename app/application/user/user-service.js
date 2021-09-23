@@ -44,9 +44,9 @@ class UserService {
     }
 
     async loginUser({ email, password }) {
-        const user = User.findOne({ email })
+        const user = await User.findOne({ email })
 
-        const isValidPassword = bcrypt.compare(password)
+        const isValidPassword = await bcrypt.compare(password, user.password)
 
         if (!isValidPassword) {
             throw new Error('Invalid credentials');
@@ -59,6 +59,7 @@ class UserService {
             }
         );
 
+        console.log(token);
         user.update({ accessToken: token })
 
         return user
