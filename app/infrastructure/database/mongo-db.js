@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
-
-const { MONGO_URI } = process.env;
+const db = require('../config/database')
 
 exports.connect = () => {
     // Connecting to the database
     mongoose
-        .connect(MONGO_URI)
+        .connect(db.MONGO_HOST)
         .then(() => {
             console.log("Successfully connected to database");
         })

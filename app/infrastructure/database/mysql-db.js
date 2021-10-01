@@ -1,9 +1,9 @@
 const { Sequelize } = require('sequelize');
-
-const sequelize = new Sequelize('todo', 'root', 'root', {
-    host: '127.0.0.1',
+const db = require('../config/database')
+const sequelize = new Sequelize(db.NAME, db.USERNAME, db.PASSWORD, {
+    host: db.HOST,
     dialect: 'mysql',
-    port: 3307
+    port: db.PORT
 });
 
 sequelize.authenticate().then(() => {

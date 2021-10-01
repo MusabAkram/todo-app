@@ -2,7 +2,7 @@ const User = require("../../domain/models/mongoose/user");
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 const { v1: uuidv1 } = require('uuid');
-
+const UserRepository = require('../../infrastructure/database/sql/repository/user-repository')
 class UserService {
     async createUser({ firstName, lastName, email, password }) {
         if (!(email && password && firstName && lastName)) {
@@ -18,6 +18,7 @@ class UserService {
         const encryptedPassword = await bcrypt.hash(password, 10);
 
         const userId = uuidv1()
+
         const token = jwt.sign(
             { userId },
             process.env.TOKEN_SECRET,
@@ -26,14 +27,23 @@ class UserService {
             }
         );
 
-        const user = await User.create({
+        const user = UserRepository().create({
             userId,
             firstName,
             lastName,
             email: email.toLowerCase(),
             password: encryptedPassword,
             accessToken: token
-        });
+        })
+
+        // const user = await User.create({
+        //     userId,
+        //     firstName,
+        //     lastName,
+        //     email: email.toLowerCase(),
+        //     password: encryptedPassword,
+        //     accessToken: token
+        // });
 
         return user
     }
