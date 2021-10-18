@@ -1,6 +1,6 @@
 const express = require('express');
 require('dotenv').config()
-require("./app/infrastructure/database/mongo-db").connect();
+// require("./app/infrastructure/database/mongo-db").connect();
 require("./app/infrastructure/database/mysql-db");
 
 const todoRoutes = require('./app/http/routes/todo-routes')

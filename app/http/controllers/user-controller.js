@@ -1,13 +1,15 @@
+const CreateUserDTO = require("../../application/user/dto/create-user-dto");
+const UpdateUserDTO = require("../../application/user/dto/update-user-dto");
 const UserService = require("../../application/user/user-service");
-const { v1: uuidv1 } = require('uuid');
-
 class UserController {
 
-    async createUser(req, res) {
+    static async createUser(req, res) {
         try {
             const { firstName, lastName, email, password } = req.body;
-            const uuid = uuidv1()
-            const user = await UserService.createUser({ firstName, lastName, email, password, uuid })
+
+            const dto = new CreateUserDTO({ firstName, lastName, email, password })
+
+            const user = await UserService.createUser(dto)
 
             return res.status(201).json(user);
 
@@ -16,7 +18,7 @@ class UserController {
         }
     }
 
-    async getUser(req, res) {
+    static async getUser(req, res) {
         const { userId } = req
 
         const user = await UserService.getUser(userId)
@@ -24,23 +26,14 @@ class UserController {
         return res.status(200).json(user)
     }
 
-    async loginUser(req, res) {
-        try {
-            const user = await UserService.loginUser({ email: req.body.email, password: req.body.password })
-
-            return res.status(200).json(user)
-
-        } catch (err) {
-            return res.status(400).json(err.message)
-        }
-    }
-
-    async updateUser(req, res) {
+    static async updateUser(req, res) {
         try {
             const payload = req.body
             const { userId } = req
 
-            const user = await UserService.updateUser({ userId, payload })
+            const dto = new UpdateUserDTO({ userId, payload })
+
+            const user = await UserService.updateUser(dto)
 
             return res.status(204).json(user)
 
@@ -49,7 +42,7 @@ class UserController {
         }
     }
 
-    async deleteUser(req, res) {
+    static async deleteUser(req, res) {
         try {
             const { userId } = req
 
@@ -66,4 +59,4 @@ class UserController {
 
 }
 
-module.exports = new UserController()
+module.exports = UserController

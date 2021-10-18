@@ -1,27 +1,19 @@
-const Todo = require("../../domain/models/mongoose/todo");
+const Todo = require("../../domain/todo/todo");
 const { v1: uuidv1 } = require('uuid');
+const TodoRepository = require("../../infrastructure/database/sql/repository/todo-repository");
 
 class TodoService {
 
-    async createTodo({ title, description, userId }) {
-        if (!title && !description) {
-            new Error('All inputs are required');
-        }
-        const todoId = uuidv1()
+    static async createTodo(dto) {
 
-        const todo = await Todo.create({
-            title,
-            description,
-            todoId,
-            userId
-        });
+        const todo = await TodoRepository.create(dto.getTodo());
 
         return todo
     }
 
-    async getTodoList(userId) {
+    async getUserTodoList(userId) {
 
-        const todoList = await Todo.find({ userId });
+        const todoList = await TodoRepository.find({ userId });
 
         return todoList
     }

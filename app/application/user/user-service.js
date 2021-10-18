@@ -1,91 +1,48 @@
-const User = require("../../domain/models/mongoose/user");
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken');
-const { v1: uuidv1 } = require('uuid');
-const UserRepository = require('../../infrastructure/database/sql/repository/user-repository')
+const UserRepository = require('../../infrastructure/database/sql/repository/user-repository');
+const { Error } = require("mongoose");
 class UserService {
-    async createUser({ firstName, lastName, email, password }) {
-        if (!(email && password && firstName && lastName)) {
-            throw new Error('All inputs are required');
-        }
+    static async createUser(dto) {
 
-        const oldUser = await User.findOne({ email });
+        const oldUser = await UserRepository.findOne({ email: dto.getEmail() });
 
         if (oldUser) {
             throw new Error('User Already Exist. Please Login');
         }
 
-        const encryptedPassword = await bcrypt.hash(password, 10);
-
-        const userId = uuidv1()
-
-        const token = jwt.sign(
-            { userId },
-            process.env.TOKEN_SECRET,
-            {
-                expiresIn: "2h",
-            }
-        );
-
-        const user = UserRepository().create({
-            userId,
-            firstName,
-            lastName,
-            email: email.toLowerCase(),
-            password: encryptedPassword,
-            accessToken: token
-        })
-
-        // const user = await User.create({
-        //     userId,
-        //     firstName,
-        //     lastName,
-        //     email: email.toLowerCase(),
-        //     password: encryptedPassword,
-        //     accessToken: token
-        // });
+        const user = UserRepository.create(dto.getUser())
 
         return user
     }
 
-    async getUser(userId) {
-        const user = User.findOne({ userId })
+    static async getUser(userId) {
+        const user = UserRepository.findOne({ userId })
         return user
     }
 
-    async loginUser({ email, password }) {
-        const user = await User.findOne({ email })
 
-        const isValidPassword = await bcrypt.compare(password, user.password)
+    static async updateUser(dto) {
 
-        if (!isValidPassword) {
-            throw new Error('Invalid credentials');
+        const user = await UserRepository.getById(dto.getUserId());
+
+        if (user) {
+            user.updateProps(dto.getPayload())
+
+            await UserRepository.update(user)
         }
-        const token = jwt.sign(
-            { userId: user.userId },
-            process.env.TOKEN_SECRET,
-            {
-                expiresIn: "2h",
-            }
-        );
 
-        console.log(token);
-        user.update({ accessToken: token })
 
         return user
     }
 
-    async updateUser({ userId, payload }) {
-        const user = User.updateOne({ userId }, { ...payload })
+    static async deleteUser({ userId }) {
+        try {
+            await UserRepository.deleteById(userId);
 
-        return user
-    }
-
-    async deleteUser({ userId }) {
-        const res = User.deleteOne({ userId });
-
-        return res;
+            return true;
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 }
 
-module.exports = new UserService()
+module.exports = UserService

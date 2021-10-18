@@ -1,3 +1,4 @@
+const CreateTodoDTO = require("../../application/todo/dto/create-todo-dto");
 const TodoService = require("../../application/todo/todo-service");
 
 class TodoController {
@@ -6,8 +7,10 @@ class TodoController {
         try {
             const { title, description } = req.body;
             const { userId } = req
-            console.log(req.userId);
-            const todo = await TodoService.createTodo({ title, description, userId })
+
+            const dto = new CreateTodoDTO({ title, description, userId })
+
+            const todo = await TodoService.createTodo(dto)
 
             res.status(201).json(todo);
         } catch (err) {
@@ -19,20 +22,21 @@ class TodoController {
         try {
             const { userId } = req
 
-            const todo = await TodoService.getTodoList(userId)
+            const todo = await TodoService.getUserTodoList(userId)
 
-            res.status(201).json(todo);
+            res.status(200).json(todo);
+
         } catch (err) {
             return res.status(400).json(err.message)
         }
     }
+
     async updateTodo(req, res) {
         try {
             const { userId } = req
             const payload = req.body
             const { todoId } = req.params
 
-            console.log(todoId);
             const todo = await TodoService.updateTodo({ userId, payload, todoId })
 
             res.status(201).json(todo);
@@ -40,6 +44,7 @@ class TodoController {
             return res.status(400).json(err.message)
         }
     }
+
     async deleteTodo(req, res) {
         try {
             const { userId, params: { todoId } } = req

@@ -9,8 +9,6 @@ router.get("/", function (req, res) {
 
 router.post("/", UserController.createUser)
 
-router.get("/login", UserController.loginUser)
-
 router.get("/:userId", AuthMiddleware, UserController.getUser)
 
 router.put("/", AuthMiddleware, UserController.updateUser)

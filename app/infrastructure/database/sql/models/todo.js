@@ -9,7 +9,7 @@ const TodoModel = sequelize.define("todo", {
     },
     userId: {
         type: DataTypes.UUID,
-        primaryKey: true,
+        foreignKey: true,
         allowNull: false,
     },
     title: DataTypes.TEXT,

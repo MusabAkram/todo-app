@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require("sequelize");
+const TodoModel = require("./todo");
 const sequelize = new Sequelize("sqlite::memory:");
 
 const UserModel = sequelize.define("user", {
@@ -25,6 +26,10 @@ const UserModel = sequelize.define("user", {
 
 });
 
+UserModel.hasMany(TodoModel, {
+    foreignKey: 'userId',
+    as: 'todos',
+});
 
 
 module.exports = UserModel
